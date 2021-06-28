@@ -18,6 +18,8 @@
 
   #include <Arduino.h>
 
+  #include <array>
+
   // 57./58./59. namespace?
   // 72./73./74./75. exceptions
   // 68. assert
@@ -608,12 +610,10 @@
         byte PEC;
       };
 
-      Registers regs;
-
       /**
        * Number of maximum cells connected to LTC6802.
        */
-      static const byte maxCells = 12;
+      static constexpr byte maxCells = 12;
 
       /**
        * Chip SPI address.
@@ -623,7 +623,12 @@
       /**
        * Chip select pin.
        */
-      byte csPin = 10;
+      byte csPin;
+
+      /**
+       * Register map
+       */
+      Registers regs;
 
       // Disable array heap allocation
       static void *operator new[] (size_t);
@@ -636,8 +641,8 @@
        * @param numOfRegisters Number of registers to read
        * @param arr Array for register values
        */
-      template<typename Arr>
-      void LTC6802::read(const byte cmd, Arr &arr);
+      template<std::size_t N>
+      void read(const Commands cmd, std::array<byte, N> &arr);
 
       /**
        * Send measure command to chip.
@@ -645,7 +650,7 @@
        * @param cmd Chip command
        * @param broadcast Send as broadcast to multiple chips
        */
-      void measure(byte cmd, bool broadcast) const;
+      void measure(const Commands cmd, bool broadcast) const;
 
       /**
        * Read register values from chip.
@@ -654,8 +659,8 @@
        * @param numOfRegisters Number of registers to read
        * @param arr Array for register values
        */
-      template<typename Arr>
-      void LTC6802::readValues(const byte cmd, Arr &arr);
+      template<std::size_t N>
+      void readValues(const Commands cmd, std::array<byte, N> &arr);
 
    };
 

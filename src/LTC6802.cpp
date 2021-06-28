@@ -16,13 +16,6 @@
 #include <LTC6802.h>
 #include <SPI.h>
 
-
-/**
- * SPI settings.
- */
-static const SPISettings spiSettings = SPISettings(1000000, MSBFIRST, SPI_MODE3);
-
-
 void LTC6802::initSPI(const byte pinMOSI, const byte pinMISO, const byte pinCLK)
  {
   // TODO parameters for different arduinos (pins, clock)
@@ -64,7 +57,7 @@ LTC6802::~LTC6802()
 
 void LTC6802::measure(const LTC6802::Commands cmd, const bool broadcast) const
  {
-  SPI.beginTransaction(spiSettings);
+  SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
   digitalWrite(csPin, LOW);
   if (!broadcast)
    {
@@ -77,10 +70,10 @@ void LTC6802::measure(const LTC6802::Commands cmd, const bool broadcast) const
   // check SDO for measure finished
  }
 
-template<typename Arr>
-void LTC6802::read(const LTC6802::Commands cmd, Arr &arr) // TODO eliminate buffer overflow risk
+template<std::size_t N>
+void LTC6802::read(const LTC6802::Commands cmd, std::array<byte, N> &arr) // TODO eliminate buffer overflow risk
   {
-   SPI.beginTransaction(spiSettings);
+   SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
    digitalWrite(csPin, LOW);
    if (true)
     {
@@ -98,8 +91,8 @@ void LTC6802::read(const LTC6802::Commands cmd, Arr &arr) // TODO eliminate buff
    SPI.endTransaction();
   }
 
-template<typename Arr>
-void LTC6802::readValues(const LTC6802::Commands cmd, Arr &arr)
+template<std::size_t N>
+void LTC6802::readValues(const LTC6802::Commands cmd, std::array<byte, N> &arr)
  {
   do
    {
@@ -134,7 +127,7 @@ void LTC6802::cfgRead()
 
 void LTC6802::cfgWrite(const bool broadcast) const
  {
-  SPI.beginTransaction(spiSettings);
+  SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
   digitalWrite(csPin, LOW);
   if (!broadcast)
    {

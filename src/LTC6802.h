@@ -174,28 +174,28 @@
        *
        * @return Voltage (default: 0 or factory programmed)
        */
-      byte cfgGetVUV() const;
+      float cfgGetVUV() const;
 
       /**
        * Set undervoltage comparison voltage in configuration.
        *
        * @param vuv Voltage
        */
-      void cfgSetVUV(byte vuv);
+      void cfgSetVUV(float vuv);
 
       /**
        * Get overvoltage comparison voltage from configuration.
        *
        * @return Voltage (default: 0 or factory programmed)
        */
-      byte cfgGetVOV() const;
+      float cfgGetVOV() const;
 
       /**
        * Set overvoltage comparison voltage in configuration.
        *
        * @param vov Voltage
        */
-      void cfgSetVOV(byte vov);
+      void cfgSetVOV(float vov);
 
       /**
        * Measure temperatures on chip.

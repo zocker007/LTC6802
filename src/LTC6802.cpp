@@ -536,27 +536,27 @@ void LTC6802::cfgSetMCI(const word mci)
  }
 
 
-byte LTC6802::cfgGetVUV() const // TODO float vs double
+float LTC6802::cfgGetVUV() const // TODO float vs double
  {
-  return (CFG[4] * 16 / 1.5);
+  return (CFG[4] * 16.0f * 0.0015f);
  }
 
 
-void LTC6802::cfgSetVUV(const byte vuv) // TODO float vs double
+void LTC6802::cfgSetVUV(const float vuv) // TODO float vs double
  {
-  CFG[4] = vuv * 1.5 / 16;
+  CFG[4] = static_cast<byte>(vuv / (0.0015f * 16.0f));
  }
 
 
-byte LTC6802::cfgGetVOV() const // TODO float vs double
+float LTC6802::cfgGetVOV() const // TODO float vs double
  {
-  return (CFG[5] * 16 / 1.5);
+  return (CFG[5] * 16.0f * 0.0015f);
  }
 
 
-void LTC6802::cfgSetVOV(const byte vov) // TODO float vs double
+void LTC6802::cfgSetVOV(const float vov) // TODO float vs double
  {
-  CFG[5] = vov * 1.5 / 16;
+  CFG[5] = static_cast<byte>(vov / (0.0015f * 16.0f));
  }
 
 

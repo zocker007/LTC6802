@@ -180,7 +180,7 @@ bool LTC6802::cfgGetGPIO1() const
 
 void LTC6802::cfgSetGPIO1(const bool gpio)
  {
-  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_GPIO1_INVMSK) | (gpio << CFG0_GPIO1_BIT);
+  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_GPIO1_INVMSK) | (gpio << CFG0_GPIO1_Pos);
  }
 
 
@@ -192,7 +192,7 @@ bool LTC6802::cfgGetGPIO2() const
 
 void LTC6802::cfgSetGPIO2(const bool gpio)
  {
-  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_GPIO2_INVMSK) | (gpio << CFG0_GPIO2_BIT);
+  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_GPIO2_INVMSK) | (gpio << CFG0_GPIO2_Pos);
  }
 
 
@@ -204,48 +204,48 @@ bool LTC6802::cfgGetLVLPL() const
 
 void LTC6802::cfgSetLVLPL(const bool lvlpl)
  {
-  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_LVLPL_INVMSK) | (lvlpl << CFG0_LVLPL_BIT);
+  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_LVLPL_INVMSK) | (lvlpl << CFG0_LVLPL_Pos);
  }
 
 
-byte LTC6802::cfgGetCDC() const
+LTC6802::CDCValues LTC6802::cfgGetCDC() const
  {
-  return (regs.CFGRx[CFGR0] & CFG0_CDC_MSK);
+  return static_cast<CDCValues>(regs.CFGRx[CFGR0] & CFG0_CDC_MSK);
  }
 
 
-void LTC6802::cfgSetCDC(const byte cdc)
+void LTC6802::cfgSetCDC(const LTC6802::CDCValues cdc)
  {
   // assert cdc 0-7
-  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_CDC_INVMSK) | cdc;
+  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_CDC_INVMSK) | static_cast<byte>(cdc);
  }
 
 
-word LTC6802::cfgGetDCC() const
+DCCBitset LTC6802::cfgGetDCC() const
  {
-  return ((regs.CFGRx[CFGR1] & CFG1_DCC_MSK) | ((regs.CFGRx[CFGR2] & CFG2_DCC_MSK) << 8));
+  return DCCBitset{static_cast<unsigned long long>((regs.CFGRx[CFGR1] & CFG1_DCC_MSK) | ((regs.CFGRx[CFGR2] & CFG2_DCC_MSK) << 8))};
  }
 
 
-void LTC6802::cfgSetDCC(const word dcc)
- {
-  // assert 0x0fff
-  regs.CFGRx[CFGR1] = (dcc & 0x00ff); // (regs.CFGRx[CFGR1] & CFG1_DCC_INVMSK) |
-  regs.CFGRx[CFGR2] = (regs.CFGRx[CFGR2] & CFG2_DCC_INVMSK) | ((dcc & 0x0f00) >> 8);
- }
-
-
-word LTC6802::cfgGetMCI() const
- {
-  return ((regs.CFGRx[CFGR3] << 4) | ((regs.CFGRx[CFGR2] & CFG2_MCI_MSK) >> 4));
- }
-
-
-void LTC6802::cfgSetMCI(const word mci)
+void LTC6802::cfgSetDCC(const DCCBitset dcc)
  {
   // assert 0x0fff
-  regs.CFGRx[CFGR2] = (regs.CFGRx[CFGR2] & CFG2_MCI_INVMSK) | ((mci & 0x0f) << 4);
-  regs.CFGRx[CFGR3] = (mci & 0x0ff0) >> 4;
+  regs.CFGRx[CFGR1] = (dcc.to_ulong() & 0x00ff); // (regs.CFGRx[CFGR1] & CFG1_DCC_INVMSK) |
+  regs.CFGRx[CFGR2] = (regs.CFGRx[CFGR2] & CFG2_DCC_INVMSK) | ((dcc.to_ulong() & 0x0f00) >> 8);
+ }
+
+
+MCIBitset LTC6802::cfgGetMCI() const
+ {
+  return MCIBitset{static_cast<unsigned long long>((regs.CFGRx[CFGR3] << 4) | ((regs.CFGRx[CFGR2] & CFG2_MCI_MSK) >> 4))};
+ }
+
+
+void LTC6802::cfgSetMCI(const MCIBitset mci)
+ {
+  // assert 0x0fff
+  regs.CFGRx[CFGR2] = (regs.CFGRx[CFGR2] & CFG2_MCI_INVMSK) | ((mci.to_ulong() & 0x0f) << 4);
+  regs.CFGRx[CFGR3] = (mci.to_ulong() & 0x0ff0) >> 4;
  }
 
 

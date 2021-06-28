@@ -15,50 +15,50 @@
  */
 #include <LTC6802.h>
 
-
 /**
  * Chip 1 SPI bus address.
  */
-static const byte address1 = 0x80;
+static constexpr byte address1 = 0x80;
 
 /**
  * Chip select pin.
  */
-static const byte csPin1 = 10;
+static constexpr byte csPin1 = 10;
 
 /**
  * Chip 1 LTC6802 object.
  */
 static LTC6802 chip1 = LTC6802(address1, csPin1);
 
-
 /**
  * Arduino setup.
  */
-void setup()
- {
+void setup() {
   Serial.begin(9600);
   LTC6802::initSPI();      // Init SPI bus
-  chip1.cfgRead();         // Read configuration from chip
-  chip1.cfgSetCDC(1);      // Measure mode 13ms
-  chip1.cfgSetMCI(0x0fff); // Disable interrupts
+//  chip1.cfgRead();         // Read configuration from chip
+  chip1.cfgSetCDC(LTC6802::COMP_OFF_MEAS_13MS);      // Measure mode 13ms
+  MCIBitset mci;
+  mci.set();            // Disable interrupts
+  chip1.cfgSetMCI(mci);
   chip1.cfgWrite(false);   // Write configuration back to chip
   Serial.println("Initialized chip");
   delay(1000);
- }
-
+}
 
 /**
  * Arduino main loop.
  */
-void loop()
- {
+void loop() {
   chip1.cfgWrite(false);          // Write configuration back to chip, because chip resets these every 2.5s when nothing happens on SPI
+  delay(5);
   chip1.temperatureMeasure();     // Measure temperatures on chip
+  delay(12);
   chip1.temperatureRead();        // Read temperatures from chip
   chip1.temperatureDebugOutput(); // Send temperatures to serial
   chip1.cellsMeasure();           // Measure cell voltages on chip
+  delay(20);
   chip1.cellsRead();              // Read cell voltages from chip
   chip1.cellsDebugOutput();       // Send cell voltages to serial
   delay(3000);
- }
+}

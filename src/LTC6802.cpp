@@ -296,7 +296,7 @@ void LTC6802::initSPI(const byte pinMOSI, const byte pinMISO, const byte pinCLK)
   // SPI.setBitOrder(MSBFIRST);
   // SPI.setDataMode(SPI_MODE3);
   // SPI.setClockDivider(SPI_CLOCK_DIV16);
-  // SPI.begin();
+  SPI.begin();
 
   // SPI.begin(ETHERNET_SHIELD_SPI_CS);
   // SPI.setClockDivider(ETHERNET_SHIELD_SPI_CS, SPI_CLOCK_DIV16);
@@ -306,7 +306,7 @@ void LTC6802::initSPI(const byte pinMOSI, const byte pinMISO, const byte pinCLK)
 
 void LTC6802::destroySPI()
  {
-  // SPI.end();
+  SPI.end();
  }
 
 

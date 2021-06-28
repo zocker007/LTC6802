@@ -19,10 +19,17 @@
   #include <Arduino.h>
 
   #include <array>
+  #include <bitset>
 
   // 57./58./59. namespace?
   // 72./73./74./75. exceptions
   // 68. assert
+
+  /**
+   * Bitsets for DCC and MCI bits. One bit for each cell from bit 0 (Cell1) to 11 (Cell12)
+   */
+  using DCCBitset = std::bitset<12>;
+  using MCIBitset = std::bitset<12>;
 
   /**
    * LTC6802-2 multicell addressable battery stack monitor value class.
@@ -32,6 +39,20 @@
   class LTC6802
    {
     public:
+      /**
+       * Enum for Comparator Duty Cycle settings
+       */
+      enum CDCValues : byte {
+        STANDBY = 0,
+        COMP_OFF_MEAS_13MS = 1,
+        COMP_13MS_MEAS_13MS = 2,
+        COMP_130MS_MEAS_13MS = 3,
+        COMP_500MS_MEAS_13MS = 4,
+        COMP_130MS_MEAS_21MS = 5,
+        COMP_500MS_MEAS_21MS = 6,
+        COMP_2000MS_MEAS_21MS = 7,
+      };
+      
       /**
        * Init SPI bus for LTC6802 chips.
        *
@@ -134,42 +155,42 @@
        *
        * @return 0 : Standby mode; 1 : Measure mode comparator off; 2 : Comparator 13ms; 3 : Comparator 130ms; 4 : Comparator 500ms; 5: Comparator 130ms with power down; 6 : Comparator 500ms with power down; 7 : Comparator 2000ms with power down
        */
-      byte cfgGetCDC() const;
+      CDCValues cfgGetCDC() const;
 
       /**
        * Set comparator duty cycle in configuration.
        *
        * @param cdc 0 : Standby mode; 1 : Measure mode comparator off; 2 : Comparator 13ms; 3 : Comparator 130ms; 4 : Comparator 500ms; 5: Comparator 130ms with power down; 6 : Comparator 500ms with power down; 7 : Comparator 2000ms with power down
        */
-      void cfgSetCDC(byte cdc);
+      void cfgSetCDC(CDCValues cdc);
 
       /**
        * Get discharge cell flags from configuration.
        *
        * @return bit 0-11: 0: turn off shorting switch for cell (default); 1: turn on shorting switch
        */
-      word cfgGetDCC() const;
+      std::bitset<12> cfgGetDCC() const;
 
       /**
        * Set discharge cell flags in configuration.
        *
        * @param dcc bit 0-11: 0: turn off shorting switch for cell (default); 1: turn on shorting switch
        */
-      void cfgSetDCC(word dcc);
+      void cfgSetDCC(std::bitset<12> dcc);
 
       /**
        * Get mask cell interrupt flags from configuration.
        *
        * @return bit 0-11: 0: enable interrupt value for cell (default); 1: turn off interrupts and clear flags for cell
        */
-      word cfgGetMCI() const;
+      std::bitset<12> cfgGetMCI() const;
 
       /**
        * Set mask cell interrupt flags in configuration.
        *
        * @param mci bit 0-11: 0: enable interrupt value for cell (default); 1: turn off interrupts and clear flags for cell
        */
-      void cfgSetMCI(word mci);
+      void cfgSetMCI(std::bitset<12> mci);
 
       /**
        * Get undervoltage comparison voltage from configuration.
@@ -494,27 +515,27 @@
         /**
          * Configuration register 0 watchdog timer bit.
          */
-        CFG0_WDT_BIT    = 7,
+        CFG0_WDT_Pos    = 7,
 
         /**
          * Configuration register 0 GPIO2 bit.
          */
-        CFG0_GPIO2_BIT  = 6,
+        CFG0_GPIO2_Pos  = 6,
 
         /**
          * Configuration register 0 GPIO1 bit.
          */
-        CFG0_GPIO1_BIT  = 5,
+        CFG0_GPIO1_Pos  = 5,
 
         /**
          * Configuration register 0 level polling mode bit.
          */
-        CFG0_LVLPL_BIT  = 4,
+        CFG0_LVLPL_Pos  = 4,
 
         /**
          * Configuration register 0 10-cell mode bit.
          */
-        CFG0_CELL10_BIT = 3,
+        CFG0_CELL10_Pos = 3,
 
         // CFG0_CDC_BITS   = 0-2,
         // CFG1_DCC_BITS   = 0-7,
@@ -523,6 +544,9 @@
         // CFG3_MCI_BITS   = 0-7,
       };
 
+      /**
+       * Enum for register indices in register map arrays
+       */
       enum RegNames {
         CFGR0 = 0,
         CFGR1 = 1,

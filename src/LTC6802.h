@@ -169,28 +169,28 @@
        *
        * @return bit 0-11: 0: turn off shorting switch for cell (default); 1: turn on shorting switch
        */
-      std::bitset<12> cfgGetDCC() const;
+      DCCBitset cfgGetDCC() const;
 
       /**
        * Set discharge cell flags in configuration.
        *
        * @param dcc bit 0-11: 0: turn off shorting switch for cell (default); 1: turn on shorting switch
        */
-      void cfgSetDCC(std::bitset<12> dcc);
+      void cfgSetDCC(DCCBitset dcc);
 
       /**
        * Get mask cell interrupt flags from configuration.
        *
        * @return bit 0-11: 0: enable interrupt value for cell (default); 1: turn off interrupts and clear flags for cell
        */
-      std::bitset<12> cfgGetMCI() const;
+      MCIBitset cfgGetMCI() const;
 
       /**
        * Set mask cell interrupt flags in configuration.
        *
        * @param mci bit 0-11: 0: enable interrupt value for cell (default); 1: turn off interrupts and clear flags for cell
        */
-      void cfgSetMCI(std::bitset<12> mci);
+      void cfgSetMCI(MCIBitset mci);
 
       /**
        * Get undervoltage comparison voltage from configuration.

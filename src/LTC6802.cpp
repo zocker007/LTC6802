@@ -23,12 +23,9 @@ void LTC6802::initSPI(const byte pinMOSI, const byte pinMISO, const byte pinCLK)
   pinMode(pinMISO, INPUT);
   pinMode(pinCLK, OUTPUT);
 
-  //SPI.setBitOrder(MSBFIRST);
-  //SPI.setDataMode(SPI_MODE3);
-  //SPI.setClockDivider(SPI_CLOCK_DIV16);
-  //SPI.setBitOrder(MSBFIRST);
-  //SPI.setDataMode(SPI_MODE3);
-  //SPI.setClockDivider(SPI_CLOCK_DIV128);
+  // SPI.setBitOrder(MSBFIRST);
+  // SPI.setDataMode(SPI_MODE3);
+  // SPI.setClockDivider(SPI_CLOCK_DIV16);
   SPI.begin();
 
   // SPI.begin(ETHERNET_SHIELD_SPI_CS);

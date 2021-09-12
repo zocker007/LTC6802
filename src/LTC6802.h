@@ -52,6 +52,11 @@
         COMP_500MS_MEAS_21MS = 6,
         COMP_2000MS_MEAS_21MS = 7,
       };
+
+      /**
+       * Number of maximum cells connected to LTC6802.
+       */
+      static constexpr byte maxCells = 12;
       
       /**
        * Init SPI bus for LTC6802 chips.
@@ -85,7 +90,7 @@
       /**
        * Read configuration from chip registers.
        */
-      void cfgRead();
+      void cfgRead(const bool broadcast);
 
       /**
        * Write configuration to chip registers.
@@ -135,6 +140,20 @@
        * @param gpio 0 : GPIO2 pin pull down on; 1 : GPIO2 pin pull down off (default)
        */
       void cfgSetGPIO2(bool gpio);
+
+      /**
+       * Get CELL10 bit from configuration.
+       *
+       * @return 0 : 12-cell mode (default); 1 :10-cell mode
+       */
+      bool cfgGetCELL10() const;
+
+      /**
+       * Set cell10 bit: If the CELL10 bit is high, then the inputs for cells 11 and 12 are automatically masked.
+       *
+       * @param cell10 1 : Cell10 on; 0 : cell10 off (default)
+       */
+      void cfgSetCELL10(bool cell10);
 
       /**
        * Get level polling mode from configuration.
@@ -223,12 +242,12 @@
       /**
        * Measure temperatures on chip.
        */
-      void temperatureMeasure();
+      void temperatureMeasure(const bool broadcast);
 
       /**
        * Read temperatures from chip.
        */
-      void temperatureRead();
+      void temperatureRead(const bool broadcast);
 
       /**
        * Write temperatures to serial.
@@ -240,12 +259,12 @@
       /**
        * Measure cell voltages on chip.
        */
-      void cellsMeasure();
+      void cellsMeasure(const bool broadcast);
 
       /**
        * Read cell voltages from chip.
        */
-      void cellsRead();
+      void cellsRead(const bool broadcast);
 
       /**
        * Write cell voltages to serial.
@@ -257,7 +276,7 @@
       /**
        * Read flag register group from chip.
        */
-      void flagsRead();
+      void flagsRead(const bool broadcast);
 
       /**
        * Write flag register group to serial.
@@ -266,6 +285,19 @@
        */
       void flagsDebugOutput();
 
+      /**
+       * Poll for ADC operation complete 
+       * @return busy status, returns false when complete.
+       */
+      bool pollADC(const bool broadcast) const;
+
+      /**
+       * expose array of cell voltage data
+       * 
+       * @param cellvolts
+       */
+      void getVolts(std::array<word, maxCells> &cellvolts) const;
+      
       // bool operator==(const LTC6802& obj1, const LTC6802& obj2);
       // bool operator!=(const LTC6802& obj1, const LTC6802& obj2);
 
@@ -635,11 +667,6 @@
       };
 
       /**
-       * Number of maximum cells connected to LTC6802.
-       */
-      static constexpr byte maxCells = 12;
-
-      /**
        * Chip SPI address.
        */
       byte address;
@@ -666,7 +693,7 @@
        * @param arr Array for register values
        */
       template<std::size_t N>
-      void read(const Commands cmd, std::array<byte, N> &arr);
+      void read(const Commands cmd, std::array<byte, N> &arr, const bool broadcast);
 
       /**
        * Send measure command to chip.
@@ -684,7 +711,7 @@
        * @param arr Array for register values
        */
       template<std::size_t N>
-      void readValues(const Commands cmd, std::array<byte, N> &arr);
+      void readValues(const Commands cmd, std::array<byte, N> &arr, const bool broadcast);
 
    };
 

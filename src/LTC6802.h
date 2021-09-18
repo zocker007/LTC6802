@@ -297,6 +297,30 @@
        * @param cellvolts
        */
       void getVolts(std::array<word, maxCells> &cellvolts) const;
+
+      /**
+       * expose array of temperatures
+       * 0: external temp1; 1: external temp2; 2: internal temp
+       * 3: Thermal shutdown (1 for shutdown 0 for OK)
+       * 4: chip revision!
+       * 
+       * @param temp
+       */
+      void getTemps(std::array<word, 3> &temp) const;
+
+      /**
+       * expose thermal shutdown bit
+       * 
+       * @return thermal shutdown status (1 for shutdown 0 for OK)
+       */
+      bool getTHSD() const;
+
+      /**
+       * expose chip revision
+       * 
+       * @return chip revision
+       */
+      word getChipRevision() const;
       
       // bool operator==(const LTC6802& obj1, const LTC6802& obj2);
       // bool operator!=(const LTC6802& obj1, const LTC6802& obj2);
@@ -702,16 +726,6 @@
        * @param broadcast Send as broadcast to multiple chips
        */
       void measure(const Commands cmd, bool broadcast) const;
-
-      /**
-       * Read register values from chip.
-       *
-       * @param cmd Read command.
-       * @param numOfRegisters Number of registers to read
-       * @param arr Array for register values
-       */
-      template<std::size_t N>
-      void readValues(const Commands cmd, std::array<byte, N> &arr, const bool broadcast);
 
    };
 

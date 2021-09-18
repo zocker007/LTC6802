@@ -77,7 +77,7 @@ void LTC6802::read(const LTC6802::Commands cmd, std::array<byte, N> &arr, const 
    digitalWrite(csPin, LOW);
    if (!broadcast)
     {
-     SPI.transfer(this->address); // TODO broadcast
+     SPI.transfer(this->address);
     }
     
    SPI.transfer(static_cast<byte>(cmd));
@@ -93,18 +93,7 @@ void LTC6802::read(const LTC6802::Commands cmd, std::array<byte, N> &arr, const 
    SPI.endTransaction();
   }
 
-template<std::size_t N>
-void LTC6802::readValues(const LTC6802::Commands cmd, std::array<byte, N> &arr, const bool broadcast)
- {
-  do
-   {
-    read(cmd, arr, broadcast);
-   }
-  while (arr[0] == 0xff);
- }
-
-
- void LTC6802::flagsRead(const bool broadcast)
+void LTC6802::flagsRead(const bool broadcast)
   {
    read(RDFLG, this->regs.FLGRx, broadcast);
   }
@@ -308,7 +297,7 @@ void LTC6802::temperatureMeasure(const bool broadcast)
 
 void LTC6802::temperatureRead(const bool broadcast)
  {
-  readValues(RDTMP, this->regs.TMPRx, broadcast);
+  read(RDTMP, this->regs.TMPRx, broadcast);
  }
 
 
@@ -351,7 +340,7 @@ void LTC6802::cellsMeasure(const bool broadcast)
 
 void LTC6802::cellsRead(const bool broadcast)
  {
-  readValues(RDCV, this->regs.CVRxx, broadcast);
+  read(RDCV, this->regs.CVRxx, broadcast);
  }
 
 void LTC6802::getVolts(std::array<word, maxCells> &cellvolts) const
@@ -373,6 +362,23 @@ void LTC6802::getVolts(std::array<word, maxCells> &cellvolts) const
 
   cellvolts[10] = regs.CVRxx[CVR15] | ((regs.CVRxx[CVR16] & 0x0F) << 8);
   cellvolts[11] = ((regs.CVRxx[CVR16] & 0xf0) >> 4) | (regs.CVRxx[CVR17] << 4);
+ }
+
+ void LTC6802::getTemps(std::array<word, 3> &temp) const
+ {
+   temp[0] = regs.TMPRx[TMPR0] |((regs.TMPRx[TMPR1] & 0x0f) << 8); // external temp1
+   temp[1] = ((regs.TMPRx[TMPR1] & 0xf0) >> 4) | (regs.TMPRx[TMPR2] << 4); // external temp2
+   temp[2] = regs.TMPRx[TMPR3] |((regs.TMPRx[TMPR4] & 0x0f) << 8); // internal temp
+ }
+
+ bool LTC6802::getTHSD() const
+ {
+   return (regs.TMPRx[TMPR4] >> 4) & 0x01;
+ }
+
+ word LTC6802::getChipRevision() const
+ {
+   return regs.TMPRx[TMPR4] >> 5;
  }
 
 void LTC6802::cellsDebugOutput() const

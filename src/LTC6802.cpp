@@ -71,40 +71,31 @@ void LTC6802::measure(const LTC6802::Commands cmd, const bool broadcast) const
  }
 
 template<std::size_t N>
-void LTC6802::read(const LTC6802::Commands cmd, std::array<byte, N> &arr) // TODO eliminate buffer overflow risk
+void LTC6802::read(const LTC6802::Commands cmd, std::array<byte, N> &arr, const bool broadcast) // TODO eliminate buffer overflow risk
   {
    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
    digitalWrite(csPin, LOW);
-   if (true)
+   if (!broadcast)
     {
-     SPI.transfer(this->address); // TODO broadcast
+     SPI.transfer(this->address);
     }
+    
    SPI.transfer(static_cast<byte>(cmd));
 
    for (auto &element : arr)
     {
      element = SPI.transfer(static_cast<byte>(cmd));
     }
+    
    /* byte pec = */ SPI.transfer(static_cast<byte>(cmd));
 
    digitalWrite(csPin, HIGH);
    SPI.endTransaction();
   }
 
-template<std::size_t N>
-void LTC6802::readValues(const LTC6802::Commands cmd, std::array<byte, N> &arr)
- {
-  do
-   {
-    read(cmd, arr);
-   }
-  while (arr[0] == 0xff);
- }
-
-
- void LTC6802::flagsRead()
+void LTC6802::flagsRead(const bool broadcast)
   {
-   read(RDFLG, this->regs.FLGRx);
+   read(RDFLG, this->regs.FLGRx, broadcast);
   }
 
 
@@ -119,11 +110,26 @@ void LTC6802::readValues(const LTC6802::Commands cmd, std::array<byte, N> &arr)
   }
 
 
-void LTC6802::cfgRead()
+void LTC6802::cfgRead(const bool broadcast)
  {
-  read(RDCFG, this->regs.CFGRx);
+  read(RDCFG, this->regs.CFGRx, broadcast);
  }
 
+bool LTC6802::pollADC(const bool broadcast) const
+{
+  bool busy;
+  SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
+  digitalWrite(csPin, LOW);
+  if (!broadcast)
+   {
+    SPI.transfer(this->address);
+   }
+  SPI.transfer(static_cast<byte>(PLADC));
+  busy = SPI.transfer(static_cast<byte>(PLADC));
+  digitalWrite(csPin, HIGH);
+  SPI.endTransaction();
+  return busy;
+}
 
 void LTC6802::cfgWrite(const bool broadcast) const
  {
@@ -195,6 +201,16 @@ void LTC6802::cfgSetGPIO2(const bool gpio)
   regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_GPIO2_INVMSK) | (gpio << CFG0_GPIO2_Pos);
  }
 
+bool LTC6802::cfgGetCELL10() const
+ {
+  return (regs.CFGRx[CFGR0] & CFG0_CELL10_MSK);
+ }
+
+
+void LTC6802::cfgSetCELL10(const bool cell10)
+ {
+  regs.CFGRx[CFGR0] = (regs.CFGRx[CFGR0] & CFG0_CELL10_INVMSK) | (cell10 << CFG0_CELL10_Pos);
+ }
 
 bool LTC6802::cfgGetLVLPL() const
  {
@@ -273,15 +289,15 @@ void LTC6802::cfgSetVOV(const float vov) // TODO float vs double
  }
 
 
-void LTC6802::temperatureMeasure()
+void LTC6802::temperatureMeasure(const bool broadcast)
  {
-  measure(STTMPAD, false);
+  measure(STTMPAD, broadcast);
  }
 
 
-void LTC6802::temperatureRead()
+void LTC6802::temperatureRead(const bool broadcast)
  {
-  readValues(RDTMP, this->regs.TMPRx);
+  read(RDTMP, this->regs.TMPRx, broadcast);
  }
 
 
@@ -316,17 +332,54 @@ void LTC6802::temperatureDebugOutput() const
  }
 
 
-void LTC6802::cellsMeasure()
+void LTC6802::cellsMeasure(const bool broadcast)
  {
-  measure(STCVAD, false);
+  measure(STCVAD, broadcast);
  }
 
 
-void LTC6802::cellsRead()
+void LTC6802::cellsRead(const bool broadcast)
  {
-  readValues(RDCV, this->regs.CVRxx);
+  read(RDCV, this->regs.CVRxx, broadcast);
  }
 
+void LTC6802::getVolts(std::array<word, maxCells> &cellvolts) const
+ {
+  cellvolts[0] = regs.CVRxx[CVR00] | ((regs.CVRxx[CVR01] & 0x0F) << 8);
+  cellvolts[1] = ((regs.CVRxx[CVR01] & 0xf0) >> 4) | (regs.CVRxx[CVR02] << 4);
+
+  cellvolts[2] = regs.CVRxx[CVR03] | ((regs.CVRxx[CVR04] & 0x0F) << 8);
+  cellvolts[3] = ((regs.CVRxx[CVR04] & 0xf0) >> 4) | (regs.CVRxx[CVR05] << 4);
+
+  cellvolts[4] = regs.CVRxx[CVR06] | ((regs.CVRxx[CVR07] & 0x0F) << 8);
+  cellvolts[5] = ((regs.CVRxx[CVR07] & 0xf0) >> 4) | (regs.CVRxx[CVR08] << 4);
+
+  cellvolts[6] = regs.CVRxx[CVR09] | ((regs.CVRxx[CVR10] & 0x0F) << 8);
+  cellvolts[7] = ((regs.CVRxx[CVR10] & 0xf0) >> 4) | (regs.CVRxx[CVR11] << 4);
+
+  cellvolts[8] = regs.CVRxx[CVR12] | ((regs.CVRxx[CVR13] & 0x0F) << 8);
+  cellvolts[9] = ((regs.CVRxx[CVR13] & 0xf0) >> 4) | (regs.CVRxx[CVR14] << 4);
+
+  cellvolts[10] = regs.CVRxx[CVR15] | ((regs.CVRxx[CVR16] & 0x0F) << 8);
+  cellvolts[11] = ((regs.CVRxx[CVR16] & 0xf0) >> 4) | (regs.CVRxx[CVR17] << 4);
+ }
+
+ void LTC6802::getTemps(std::array<word, 3> &temp) const
+ {
+   temp[0] = regs.TMPRx[TMPR0] |((regs.TMPRx[TMPR1] & 0x0f) << 8); // external temp1
+   temp[1] = ((regs.TMPRx[TMPR1] & 0xf0) >> 4) | (regs.TMPRx[TMPR2] << 4); // external temp2
+   temp[2] = regs.TMPRx[TMPR3] |((regs.TMPRx[TMPR4] & 0x0f) << 8); // internal temp
+ }
+
+ bool LTC6802::getTHSD() const
+ {
+   return (regs.TMPRx[TMPR4] >> 4) & 0x01;
+ }
+
+ word LTC6802::getChipRevision() const
+ {
+   return regs.TMPRx[TMPR4] >> 5;
+ }
 
 void LTC6802::cellsDebugOutput() const
  {
